@@ -7,8 +7,8 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtWidgets
-from my_action import MyAction
-from PyQt5 import sip
+from my_action import MyAction, WorkThread
+from PyQt5 import sip # 为了打包exe文件包含的库
 
 
 class Ui_Form(object):
@@ -62,6 +62,10 @@ class Ui_Form(object):
         # 创建活动处理对象
         self.active_action = MyAction(self)
 
+        # 创建线程
+        self.thread = WorkThread(self)
+        self.thread.trigger.connect(self.log_out)
+
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -85,6 +89,9 @@ class Ui_Form(object):
         self.button_manjian.clicked.connect(self.active_action.ui_action)
         self.button_output.clicked.connect(self.active_action.ui_action)
         self.pushButton.clicked.connect(self.active_action.ui_action)
+
+    def log_out(self, cur_str):
+        print(cur_str)
 
 
 if __name__ == "__main__":

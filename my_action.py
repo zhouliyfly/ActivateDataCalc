@@ -1,5 +1,6 @@
 import active_calc
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 class MyAction(object):
@@ -43,7 +44,9 @@ class MyAction(object):
             self.ui_obj.label_output.setText(self.table_paths['output'])
             print(self.table_paths['output'])
         elif sender.text() == "生成数据":
-            self.calc_data()
+            # 启动线程计算数据
+            self.ui_obj.pushButton.setEnabled(False)  # 生成数据按钮暂时禁用
+            self.ui_obj.thread.start()  # 开启线程执行数据计算
         else:
             pass
 
@@ -65,3 +68,17 @@ class MyAction(object):
             # 此处待优化
             if status:
                 self.ui_obj.label_status.setText("已成功生成活动表！")
+
+
+class WorkThread(QThread):
+    trigger = pyqtSignal(str)
+
+    def __init__(self, ui_obj):
+        super(WorkThread, self).__init__()
+        self.ui_obj = ui_obj
+
+    def run(self):
+        self.ui_obj.active_action.calc_data()
+        self.ui_obj.pushButton.setEnabled(True)  # 生成数据按键恢复
+        # 发出信号
+        # trigger.emit(s)
