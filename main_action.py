@@ -52,7 +52,12 @@ class MainAction(QMainWindow):
         self.ui_main.generate_data_button.setEnabled(False)  # 生成数据按钮暂时禁用
         self.ui_main.thread.start()  # 开启线程执行数据计算
         # self.ui_main.thread.join()
-        self.ui_main.generate_data_button.setEnabled(True)  # 生成数据按键恢复
+        # 这里暂时有问题，主线程没有等子线程执行结束就恢复了按钮。然而，等待结束再调用就
+        # 违背了使用子线程避免主线程卡顿的原意。所以按键状态的操作必须在子线程中进行（发送信号），
+        # 两个方法：第一个是线程再定义一个消息类(pyqtSignal)，专门用于改变按键状态；第二个是传递消息的函数参数改成
+        # 字典或者列表，使之能够传递2个参数，从而区分是状态栏消息还是按键状态消息。
+
+        # self.ui_main.generate_data_button.setEnabled(True)  # 生成数据按键恢复
 
     def calc_all_data(self, trigger):
         print("开始生成数据...")
@@ -61,11 +66,9 @@ class MainAction(QMainWindow):
         if self.table_paths['dingdan'] == "":
             print("找不到订单表！")
             trigger.emit("找不到订单表！")
-            # self.ui_main.main_window.statusBar().showMessage("找不到订单表！")
         elif self.table_paths['manjian'] == "" and self.table_paths['tejia'] == "":
             print("找不到满减表或特价表！")
             trigger.emit("找不到满减表或特价表！")
-            # self.ui_main.main_window.statusBar().showMessage("找不到满减表或特价表！")
         else:
             # 每次点击“生成数据”都会重新读取表格数据进行计算。acontext是临时局部变量，
             # 若是想要读取表格数据和计算活动分开，需要分拆这两个步骤。并将获取的表格数据保存为类成员变量
@@ -78,7 +81,7 @@ class MainAction(QMainWindow):
 
 
 class WorkThread(QThread):
-    trigger = pyqtSignal(str)
+    trigger = pyqtSignal([str], [bool])
 
     def __init__(self, ui_main):
         super().__init__()
@@ -87,5 +90,5 @@ class WorkThread(QThread):
     def run(self):
         self.ui_main.main_action.calc_all_data(self.trigger)
         # self.ui_main.generate_data_button.setEnabled(True)  # 生成数据按键恢复
-        # 发出信号
+        self.trigger[bool].emit(True)
 

@@ -18,7 +18,8 @@ class UiMainWindow(object):
 
         # 创建线程
         self.thread = main_action.WorkThread(self)
-        self.thread.trigger.connect(self.set_status)
+        self.thread.trigger[str].connect(self.set_msg_statusbar)
+        self.thread.trigger[bool].connect(self.change_button_status)
 
         # 初始化按键响应
         self.button_dingdan.clicked.connect(self.main_action.on_button_dingdan_clicked)
@@ -72,7 +73,7 @@ class UiMainWindow(object):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.main_window.setWindowTitle(_translate("main_window", "main_window"))
+        self.main_window.setWindowTitle(_translate("main_window", "数据生成工具"))
         self.button_dingdan.setText(_translate("main_window", "导入订单表"))
         self.label_dingdan.setText(_translate("main_window", "文件路径"))
         self.label_manjian.setText(_translate("main_window", "文件路径"))
@@ -83,8 +84,11 @@ class UiMainWindow(object):
         self.label_output.setText(_translate("main_window", "."))
         self.generate_data_button.setText(_translate("main_window", "生成数据"))
 
-    def set_status(self, msg):
+    def set_msg_statusbar(self, msg):
         self.main_window.statusBar().showMessage(msg)
+
+    def change_button_status(self, stat):
+        self.generate_data_button.setEnabled(stat)
 
 
 if __name__ == "__main__":
