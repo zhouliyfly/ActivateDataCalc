@@ -7,6 +7,8 @@ from PyQt5 import sip  # 为了打包exe文件包含的库
 
 
 class UiMainWindow(object):
+    _Version = '1.2'  # 版本号
+
     def __init__(self, mian_window):
         self.main_window = mian_window
 
@@ -73,7 +75,7 @@ class UiMainWindow(object):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.main_window.setWindowTitle(_translate("main_window", "数据生成工具"))
+        self.main_window.setWindowTitle(_translate("main_window", "数据生成工具 -v{0}".format(UiMainWindow._Version)))
         self.button_dingdan.setText(_translate("main_window", "导入订单表"))
         self.label_dingdan.setText(_translate("main_window", "文件路径"))
         self.label_manjian.setText(_translate("main_window", "文件路径"))
