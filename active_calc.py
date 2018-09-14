@@ -30,6 +30,12 @@ class ManJian(Active):
         df_manjian = active_context.tables['manjian']
         output_path = active_context.table_paths['output_path']
 
+        # 2018/09/14 <bug fixed>
+        # 修改数据类型，保证类型正确。不然表格连接时可能漏掉部分数据
+        df_dingdan['商品编号'] = df_dingdan['商品编号'].astype(str)
+        df_dingdan['订单编号'] = df_dingdan['订单编号'].astype(str)
+        df_manjian['编码'] = df_manjian['编码'].astype(str)
+
         df_order = df_dingdan[[u'订单编号', u'下单时间', u'商品编号', u'商品价格', u'商品数量']]
         df_order[u'下单时间'] = pd.to_datetime(df_order[u'下单时间'])
         df_activity = df_manjian[[u'开始时间', u'结束时间', u'编码', u'数量', u'满减']]
@@ -61,9 +67,16 @@ class TeJia(Active):
         Args:
             active_context:活动上下文类，记录表格原文件路径和表格数据
         """
+
         df_dingdan = active_context.tables['dingdan']
         df_tejia = active_context.tables['tejia']
         output_path = active_context.table_paths['output']
+
+        # 2018/09/14 <bug fixed>
+        # 修改数据类型，保证类型正确。不然表格连接时可能漏掉部分数据
+        # 下面是待连接的两列
+        df_dingdan['商品编号'] = df_dingdan['商品编号'].astype(str)
+        df_tejia['编码'] = df_tejia['编码'].astype(str)
 
         df_activity = df_tejia[[u'编码', u'药帮忙价', u'活动价']]
         df_order = df_dingdan[[u'订单编号', u'下单时间', u'商品编号', u'商品价格', u'商品数量']]
