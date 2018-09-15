@@ -7,7 +7,7 @@ from PyQt5 import sip  # 为了打包exe文件包含的库
 
 
 class UiMainWindow(object):
-    _Version = '1.2'  # 版本号
+    _Version = '1.3'  # 版本号
 
     def __init__(self, main_window):
         self.main_window = main_window
