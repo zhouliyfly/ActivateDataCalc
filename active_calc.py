@@ -133,7 +133,7 @@ class ZhuanQuManJian(Active):
         df_dingdan = df_dingdan[(df_dingdan['下单时间'] >= active_time_start) &
                                 (df_dingdan['下单时间'] <= active_time_end)]
 
-        # 选取满足活动的订单数据
+        # 选取包含活动商品的订单数据
         df_active = pd.merge(df_dingdan, df_zhuanqumanjian, on='商品编号')
 
         # 计算达到活动门槛的订单数据
@@ -161,9 +161,11 @@ class ZhuanQuManJian(Active):
 
         # 合并两张统计表并输出
         df_out = pd.concat([df_out1, df_out2], axis=1)
-        output_path = os.path.join(output_path, '专区满减活动表.xlsx')
+        output_path = os.path.join(output_path, '打包满减活动表.xlsx')
         writer = pd.ExcelWriter(output_path)
-        df_out.to_excel(writer, u'专区满减活动订单表')
+        df_active.to_excel(writer, '总销量订单表')
+        df_reach_threshold.to_excel(writer, '活动订单表')
+        df_out.to_excel(writer, '专区满减活动订单表')
         writer.save()
         print("已成功生成专区满减活动表！")
 
