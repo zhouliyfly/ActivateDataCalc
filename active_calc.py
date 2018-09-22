@@ -1,5 +1,8 @@
 import pandas as pd
 import os
+import warnings
+
+warnings.filterwarnings('ignore')  # 去除警告信息
 
 
 # 活动类
@@ -28,7 +31,7 @@ class ManJian(Active):
         """
         df_dingdan = active_context.tables['dingdan']
         df_manjian = active_context.tables['manjian']
-        output_path = active_context.table_paths['output_path']
+        output_path = active_context.table_paths['output']
 
         # 2018/09/14 <bug fixed>
         # 修改数据类型，保证类型正确。不然表格连接时可能漏掉部分数据
@@ -53,8 +56,8 @@ class ManJian(Active):
 
         output_path = os.path.join(output_path, '满减活动表.xlsx')
         writer = pd.ExcelWriter(output_path)
-        df_activityorder.to_excel(writer, u'活动订单表')
-        df_salessum.to_excel(writer, u'总销量订单表')
+        df_activityorder.to_excel(writer, u'活动订单表', index=False)
+        df_salessum.to_excel(writer, u'总销量订单表', index=False)
         writer.save()
         print("已成功生成满减活动表！")
 
@@ -89,7 +92,7 @@ class TeJia(Active):
 
         output_path = os.path.join(output_path, '特价活动表.xlsx')
         writer = pd.ExcelWriter(output_path)
-        df_activityorder.to_excel(writer, u'活动订单表')
+        df_activityorder.to_excel(writer, u'活动订单表', index=False)
         writer.save()
         print("已成功生成特价活动表！")
 
@@ -163,9 +166,9 @@ class ZhuanQuManJian(Active):
         df_out = pd.concat([df_out1, df_out2], axis=1)
         output_path = os.path.join(output_path, '打包满减活动表.xlsx')
         writer = pd.ExcelWriter(output_path)
-        df_active.to_excel(writer, '总销量订单表')
-        df_reach_threshold.to_excel(writer, '活动订单表')
-        df_out.to_excel(writer, '专区满减活动订单表')
+        df_active.to_excel(writer, '总销量订单表', index=False)
+        df_reach_threshold.to_excel(writer, '活动订单表', index=False)
+        df_out.to_excel(writer, '专区满减活动订单表', index=False)
         writer.save()
         print("已成功生成专区满减活动表！")
 

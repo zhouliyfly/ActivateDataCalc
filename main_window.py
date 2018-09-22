@@ -3,7 +3,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 # from main_action import MainAction
 import main_action
-from PyQt5 import sip  # 为了打包exe文件包含的库
+# from PyQt5 import sip  # 如果pyinstaller打包出错（缺少PyQt5包），增加此语句
 
 
 class UiMainWindow(object):

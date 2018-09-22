@@ -64,13 +64,6 @@ class MainAction(QMainWindow):
         # 启动线程计算数据
         self.ui_main.button_generate_all_data.setEnabled(False)  # 生成数据按钮暂时禁用
         self.ui_main.thread.start()  # 开启线程执行数据计算
-        # self.ui_main.thread.join()
-        # 这里暂时有问题，主线程没有等子线程执行结束就恢复了按钮。然而，等待结束再调用就
-        # 违背了使用子线程避免主线程卡顿的原意。所以按键状态的操作必须在子线程中进行（发送信号），
-        # 两个方法：第一个是线程再定义一个消息类(pyqtSignal)，专门用于改变按键状态；第二个是传递消息的函数参数改成
-        # 字典或者列表，使之能够传递2个参数，从而区分是状态栏消息还是按键状态消息。
-
-        # self.ui_main.button_generate_all_data.setEnabled(True)  # 生成数据按键恢复
 
     def calc_all_data(self, trigger):
         print("开始生成数据...")
