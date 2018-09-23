@@ -38,6 +38,8 @@ class ManJian(Active):
         df_dingdan['商品编号'] = df_dingdan['商品编号'].astype(str)
         df_dingdan['订单编号'] = df_dingdan['订单编号'].astype(str)
         df_manjian['编码'] = df_manjian['编码'].astype(str)
+        df_dingdan['商品数量'] = df_dingdan['商品数量'].astype('float')
+        df_manjian['数量'] = df_manjian['数量'].astype('float')
 
         df_order = df_dingdan[[u'订单编号', u'下单时间', u'商品编号', u'商品价格', u'商品数量']]
         df_order[u'下单时间'] = pd.to_datetime(df_order[u'下单时间'])
@@ -80,6 +82,8 @@ class TeJia(Active):
         # 下面是待连接的两列
         df_dingdan['商品编号'] = df_dingdan['商品编号'].astype(str)
         df_tejia['编码'] = df_tejia['编码'].astype(str)
+        df_dingdan['商品价格'] = df_dingdan['商品价格'].astype('float')
+        df_tejia['活动价'] = df_tejia['活动价'].astype('float')
 
         df_activity = df_tejia[[u'编码', u'药帮忙价', u'活动价']]
         df_order = df_dingdan[[u'订单编号', u'下单时间', u'商品编号', u'商品价格', u'商品数量']]
