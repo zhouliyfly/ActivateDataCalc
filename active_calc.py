@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import warnings
 
@@ -56,6 +57,9 @@ class ManJian(Active):
         df_activityorder['费用'] = (df_activityorder['商品数量'] / df_activityorder['数量']) // 1 \
                                  * df_activityorder['满减']
 
+        # 删除活动订单表中套餐数量不为NaN的值
+        df_activityorder = df_activityorder[np.isnan(df_activityorder['活动订单表'])]
+
         output_path = os.path.join(output_path, '满减活动表.xlsx')
         writer = pd.ExcelWriter(output_path)
         df_activityorder.to_excel(writer, u'活动订单表', index=False)
@@ -99,6 +103,97 @@ class TeJia(Active):
         df_activityorder.to_excel(writer, u'活动订单表', index=False)
         writer.save()
         print("已成功生成特价活动表！")
+
+
+# 阶梯满减活动
+class JieTi(Active):
+    """计算阶梯满减活动表
+
+    Attributes:
+    """
+
+    def calc(self, ser, df, df_num):
+        res = 0.0
+        # 活动区间数
+        level_nums = df_num[ser['商品编号'], ser['开始时间'], ser['结束时间']]
+        # 区间阈值
+        policy_list = df.loc[ser['商品编号'], ser['开始时间'], ser['结束时间']]
+
+        # 满数量
+        if ser['满减条件'] == '满数量':
+            for i in range(level_nums):
+                if ser['商品数量'] >= policy_list.iloc[i]['满数量/金额']:
+                    res = (ser['商品数量'] // policy_list.iloc[i]['满数量/金额']) * policy_list.iloc[i]['减金额']
+                    break
+        # 满金额
+        else:
+            for i in range(level_nums):
+                if ser['商品总额'] >= policy_list.iloc[i]['满数量/金额']:
+                    res = (ser['商品总额'] // policy_list.iloc[i]['满数量/金额']) * policy_list.iloc[i]['减金额']
+                    break
+        return res
+
+    def calculate_active_data(self, active_context):
+        """
+
+        Args:
+            active_context: 活动上下文类，记录表格原文件路径和表格数据
+        """
+        df_dingdan = active_context.tables['dingdan']
+        df_jietimanjian = active_context.tables['jietimanjian']
+        output_path = active_context.table_paths['output']
+
+        # 转换数据类型，保证类型正确
+        df_dingdan['商品编号'] = df_dingdan['商品编号'].astype(str)
+        df_dingdan['订单编号'] = df_dingdan['订单编号'].astype(str)
+        df_dingdan['商品数量'] = df_dingdan['商品数量'].astype('float')
+        df_dingdan['商品总额'] = df_dingdan['商品总额'].astype('float')
+        df_dingdan['下单时间'] = pd.to_datetime(df_dingdan['下单时间'])
+        df_jietimanjian['商品编号'] = df_jietimanjian['商品编号'].astype(str)
+        df_jietimanjian['开始时间'] = pd.to_datetime(df_jietimanjian['开始时间'])
+        df_jietimanjian['结束时间'] = pd.to_datetime(df_jietimanjian['结束时间'])
+        df_jietimanjian['满数量/金额'] = df_jietimanjian['满数量/金额'].astype('float')
+        df_jietimanjian['减金额'] = df_jietimanjian['减金额'].astype('float')
+
+        # 提取订单表中满足状态的数据
+        valid_status = ['订单审核中', '配送中', '已完成', '出库中', '已送达']
+        df_dingdan = df_dingdan[df_dingdan['状态'].isin(valid_status)]
+
+        # 1.根据模板表统计各商品阶梯数（分组计数）
+        df_jietimanjian_num = df_jietimanjian.groupby(['商品编号', '开始时间', '结束时间']).size()
+
+        # 2.模板表按商品分组排序（降序）
+        df_jietimanjian = df_jietimanjian.groupby(['商品编号', '开始时间', '结束时间']).apply(
+            lambda df: df.sort_values(by='满数量/金额', ascending=False))
+        # 删除多余的索引
+        df_jietimanjian = df_jietimanjian.reset_index(3).drop('level_3', axis=1)
+
+        # 3.筛选目标商品
+        df_tmp = df_jietimanjian.drop_duplicates(['商品编号', '开始时间', '结束时间'])
+        df_dingdan_obj1 = pd.merge(df_dingdan, df_tmp, on='商品编号')
+
+        # 4.依据时间范围筛选
+        df_dingdan_obj2 = df_dingdan_obj1[(df_dingdan_obj1['下单时间'] >= df_dingdan_obj1['开始时间'])
+                                          & (df_dingdan_obj1['下单时间'] <= df_dingdan_obj1['结束时间'])]
+
+        # 5.计算
+        df_dingdan_obj = df_dingdan_obj2.copy()
+        df_dingdan_obj['费用'] = df_dingdan_obj.apply(self.calc,
+                                                    df=df_jietimanjian,
+                                                    df_num=df_jietimanjian_num,
+                                                    axis=1)
+        # 删除冗余列
+        column = list(df_jietimanjian.columns)
+        column.remove('商品编号')
+        df_dingdan_obj = df_dingdan_obj.drop(column, axis=1)
+        df_dingdan_obj = df_dingdan_obj[df_dingdan_obj['费用'] > 0]
+
+        output_path = os.path.join(output_path, '阶梯满减活动表.xlsx')
+        writer = pd.ExcelWriter(output_path)
+        df_dingdan_obj2.to_excel(writer, u'总销量订单表', index=False)
+        df_dingdan_obj.to_excel(writer, u'阶梯满减活动表', index=False)
+        writer.save()
+        print("已成功生成阶梯满减活动表！")
 
 
 # 专区满减活动
@@ -219,6 +314,17 @@ class ManJianFactory(IActiveFactory):
         return ManJian()
 
 
+# 阶梯满减活动工厂
+class JietiManJianFactory(IActiveFactory):
+    def create_active(self):
+        """
+
+        Returns:返回满减活动类
+
+        """
+        return JieTi()
+
+
 # 特价活动工厂
 class TeJiaFactory(IActiveFactory):
     def create_active(self):
@@ -267,6 +373,8 @@ class ActiveContext(object):
             self.active_factory.append(TeJiaFactory())
         if self.table_paths['zhuanqumanjian'] != "":
             self.active_factory.append(ZhuanQuManJianFactory())
+        if self.table_paths['jietimanjian'] != "":
+            self.active_factory.append(JietiManJianFactory())
 
     def read_table(self):
         """读取数据文件
@@ -290,6 +398,8 @@ class ActiveContext(object):
                 self.tables['tejia'] = pd.read_excel(self.table_paths['tejia'])
             if self.table_paths['zhuanqumanjian'] != "":
                 self.tables['zhuanqumanjian'] = pd.read_excel(self.table_paths['zhuanqumanjian'])
+            if self.table_paths['jietimanjian'] != "":
+                self.tables['jietimanjian'] = pd.read_excel(self.table_paths['jietimanjian'])
         except:
             print('读取活动表出错')
             return False

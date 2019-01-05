@@ -20,6 +20,7 @@ class MainAction(QMainWindow):
         self.table_paths['manjian'] = ""
         self.table_paths['tejia'] = ""
         self.table_paths['zhuanqumanjian'] = ""
+        self.table_paths['jietimanjian'] = ""
         self.table_paths['output'] = "."
         self.manjian_threshold = 0
         self.manjian_cost = 0
@@ -56,6 +57,12 @@ class MainAction(QMainWindow):
                                                                                       "Excel 文件(*.xls;*.xlsx)")
         self.ui_main.label_zqmanjian.setText(self.table_paths['zhuanqumanjian'])
 
+    def on_button_jietimanjian_clicked(self):
+        self.table_paths['jietimanjian'], _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                                                    "打开文件", "./",
+                                                                                    "Excel 文件(*.xls;*.xlsx)")
+        self.ui_main.label_jietimanjian.setText(self.table_paths['jietimanjian'])
+
     def on_button_generate_all_data_clicked(self):
         # 获取输入框数据（暂时放在这里，下个版本需要挪走这部分数据）
         self.manjian_threshold = self.ui_main.lineEdit_zqmanjian_threshold.text()
@@ -74,7 +81,8 @@ class MainAction(QMainWindow):
             trigger.emit("找不到订单表！")
         elif self.table_paths['manjian'] == "" and \
                 self.table_paths['tejia'] == "" and \
-                self.table_paths['zhuanqumanjian'] == "":
+                self.table_paths['zhuanqumanjian'] == "" and \
+                self.table_paths['jietimanjian'] == "":
             print("找不到活动表！")
             trigger.emit("找不到活动表！")
         else:

@@ -7,7 +7,7 @@ import main_action
 
 
 class UiMainWindow(object):
-    _Version = '1.3'  # 版本号
+    _Version = '1.4'  # 版本号
 
     def __init__(self, main_window):
         self.main_window = main_window
@@ -30,6 +30,7 @@ class UiMainWindow(object):
         self.button_output.clicked.connect(self.main_action.on_button_output_clicked)
         self.button_generate_all_data.clicked.connect(self.main_action.on_button_generate_all_data_clicked)
         self.button_zqmanjian.clicked.connect(self.main_action.on_button_zqmanjian_clicked)
+        self.button_jietimanjian.clicked.connect(self.main_action.on_button_jietimanjian_clicked)
 
     def setup_ui(self):
         self.main_window.setObjectName("main_window")
@@ -93,6 +94,12 @@ class UiMainWindow(object):
         self.label_zqmanjian_cost.setObjectName("label_zqmanjian_cost")
         self.lineEdit_zqmanjian_cost = QtWidgets.QLineEdit(self.splitter)
         self.lineEdit_zqmanjian_cost.setObjectName("lineEdit_zqmanjian_cost")
+        self.button_jietimanjian = QtWidgets.QPushButton(self.centralWidget)
+        self.button_jietimanjian.setGeometry(QtCore.QRect(40, 210, 92, 23))
+        self.button_jietimanjian.setObjectName("button_jietimanjian")
+        self.label_jietimanjian = QtWidgets.QLabel(self.centralWidget)
+        self.label_jietimanjian.setGeometry(QtCore.QRect(140, 210, 391, 23))
+        self.label_jietimanjian.setObjectName("label_jietimanjian")
         self.main_window.setCentralWidget(self.centralWidget)
 
         self.retranslateUi()
@@ -116,6 +123,9 @@ class UiMainWindow(object):
         self.label_zqmanjian_cost.setText(_translate("MainWindow", "满减金额"))
         self.lineEdit_zqmanjian_threshold.setText(_translate("main_window", "0"))
         self.lineEdit_zqmanjian_cost.setText(_translate("main_window", "0"))
+        self.button_jietimanjian.setText(_translate("MainWindow", "导入阶梯满减"))
+        self.label_jietimanjian.setText(_translate("MainWindow", "文件路径"))
+
 
     def set_msg_statusbar(self, msg):
         self.main_window.statusBar().showMessage(msg)
